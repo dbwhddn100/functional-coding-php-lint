@@ -58,5 +58,34 @@ foreach ($files as $file) {
         }
     }
 
+    $j = [];
+    preg_match("/^\<\?php([\s\S]{1,}?)\n\s{4}(public|protected|private)( static|) function/", $source, $j);
+    $beforeMethod = $j[1];
+    $methods = [];
+    $j = [];
+    preg_match_all("/\n\s{4}(public|protected|private)( static|) function ([\s\S]{1,}?)\n\s{4}\}\n/", $source, $j);
+
+    foreach ($j[0] as $k => $v) {
+        $methods[$k]['code'] = $j[0][$k];
+        $methods[$k]['modifier'] = $j[1][$k];
+        $methods[$k]['name'] = $j[3][$k];
+    }
+
+    usort($methods, function ($a, $b) {
+        foreach (['modifier', 'name'] as $k) {
+            if ($a[$k] < $b[$k]) {
+                return -1;
+            } elseif ($a[$k] > $b[$k]) {
+                return 1;
+            }
+        }
+    });
+
+    $source = "<?php".$beforeMethod;
+    foreach ($methods as $method) {
+        $source = $source.$method['code'];
+    }
+    $source = $source."}\n";
+
     file_put_contents($file, $source);
 }
