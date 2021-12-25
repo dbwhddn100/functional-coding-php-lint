@@ -68,16 +68,30 @@ foreach ($files as $file) {
     foreach ($j[0] as $k => $v) {
         $methods[$k]['code'] = $j[0][$k];
         $methods[$k]['modifier'] = $j[1][$k];
-        $methods[$k]['name'] = $j[3][$k];
+        $methods[$k]['name'] = preg_split("/\(/", $j[3][$k])[0];
     }
 
     usort($methods, function ($a, $b) {
-        foreach (['modifier', 'name'] as $k) {
-            if ($a[$k] < $b[$k]) {
-                return -1;
-            } elseif ($a[$k] > $b[$k]) {
-                return 1;
-            }
+        if ($a['modifier'] < $b['modifier']) {
+            return 1;
+        } elseif ($a['modifier'] > $b['modifier']) {
+            return -1;
+        }
+
+        $priorities = [
+            '__construct',
+            // ...
+        ];
+
+        if (array_search($a['name'], $priorities) !== false || array_search($a['name'], $priorities) !== false) {
+            $a['name'] = array_search($a['name'], $priorities) === false ? count($priorities): array_search($a['name'], $priorities);
+            $b['name'] = array_search($b['name'], $priorities) === false ? count($priorities): array_search($b['name'], $priorities);
+        }
+
+        if ($a['name'] < $b['name']) {
+            return -1;
+        } elseif ($a['name'] > $b['name']) {
+            return 1;
         }
     });
 
